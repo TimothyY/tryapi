@@ -9,5 +9,5 @@ interface ItunesApi {
         @Query("term") term: String
     ): Call<SearchResponse>
     // Example:
-    // https://itunes.apple.com/search?term=jack+johnson&entity=music
+    // https://itunes.apple.com/search?term=jack+johnson
 }

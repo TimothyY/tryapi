@@ -7,5 +7,5 @@ data class SearchResult(
     @SerializedName("trackName") val trackName: String?,
     @SerializedName("artistName") val artistName: String?,
     @SerializedName("artworkUrl100") val artworkUrl100: String?, // URL for a 100x100 pixel artwork
-    @SerializedName("collectionName") val previewUrl: String?
+    @SerializedName("collectionName") val collectionName: String?
 )
