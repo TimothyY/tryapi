@@ -1,20 +1,12 @@
 package com.example.myapplication
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import android.util.Log
 import android.widget.Toast
-import android.content.Context
 import android.widget.TextView
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -22,7 +14,9 @@ import javax.net.ssl.SSLException
 
 class MainActivity : AppCompatActivity() {
 
-    private val itunesApi = RetrofitClient.instance
+    private val itunesApi = RetrofitClient.itunesInstance
+    private val googleApi = RetrofitClient.googleInstance //sample only for multiple different baseurl api
+
     lateinit var tvClickToSearch: TextView // Declare TextView
     lateinit var tvResult: TextView // Declare TextView
 
@@ -80,6 +74,44 @@ class MainActivity : AppCompatActivity() {
                 }
                 Toast.makeText(this@MainActivity, errorMessage, Toast.LENGTH_LONG).show()
                 Log.e("ITunesSearch", "Exception: $errorMessage", t)
+            }
+        })
+    }
+
+    fun searchGoogleApi() {
+        val call = googleApi.getGeocode("1600 Amphitheatre Parkway, Mountain View, CA", "YOUR_API_KEY") // Replace with your API key
+        call.enqueue(object : Callback<GeocodeResponse> {
+            override fun onResponse(call: Call<GeocodeResponse>, response: Response<GeocodeResponse>) {
+                if (response.isSuccessful) {
+                    val geocodeResponse = response.body()
+                    if (geocodeResponse != null) {
+                        val location = geocodeResponse.results?.firstOrNull()?.geometry?.location
+                        if (location != null) {
+                            Log.d("GoogleMaps", "Latitude: ${location.lat}, Longitude: ${location.lng}")
+                            Toast.makeText(this@MainActivity, "Location found!", Toast.LENGTH_LONG).show()
+                        } else {
+                            Log.e("GoogleMaps", "Location not found")
+                            Toast.makeText(this@MainActivity, "Location not found", Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        Log.e("GoogleMaps", "Empty response body")
+                        Toast.makeText(this@MainActivity, "Empty response", Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    Log.e("GoogleMaps", "Error: ${response.code()} - ${response.message()}")
+                    Toast.makeText(this@MainActivity, "Error fetching location", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onFailure(call: Call<GeocodeResponse>, t: Throwable) {
+                val errorMessage = when (t) {
+                    is SocketTimeoutException -> "Timeout: Server took too long to respond."
+                    is UnknownHostException -> "No Internet Connection"
+                    is SSLException -> "Problem with the server's security certificate"
+                    else -> "An unexpected error occurred: ${t.message}"
+                }
+                Toast.makeText(this@MainActivity, errorMessage, Toast.LENGTH_LONG).show()
+                Log.e("GoogleMaps", "Exception: $errorMessage", t)
             }
         })
     }
