@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.example.tryapi
 
 import org.junit.Test
 
